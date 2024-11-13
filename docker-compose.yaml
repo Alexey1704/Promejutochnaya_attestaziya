@@ -1,0 +1,34 @@
+name: postgres-py
+services:
+  s-postgres:
+    image: postgres:13
+    container_name: me-postgres
+    environment:
+      POSTGRES_DB: Ermolenko
+      POSTGRES_USER: some
+      POSTGRES_PASSWORD: Ermolenko44688
+    volumes:
+      - ./init/init.sql:/docker-entrypoint-initdb.d/init.sql
+    restart: unless-stopped
+    networks: 
+      - net
+    healthcheck:
+      test: ["CMD-SHELL", "postgres -V"]
+      interval: 5s
+      timeout: 10s
+      retries: 3
+  s-python:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    container_name: Python
+    restart: on-failure
+    networks: 
+      - net
+    depends_on:
+       s-postgres:
+        condition: service_healthy
+volumes:
+  init:
+networks:
+  net:
